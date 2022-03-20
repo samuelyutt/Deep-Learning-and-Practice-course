@@ -1,22 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import data
-
-
-class MyLoss():
-    def apply(GT, X):
-        return np.sum(np.square(np.subtract(GT, X))) / 2
-
-    def partial_derivative(GT, X, term):
-        return -(GT[term] - X[term])
-
-
-class Sigmoid():
-    def apply(x):
-        return 1.0 / (1.0 + np.exp(-x))
-
-    def derivative(x):
-        return np.multiply(x, 1.0 - x)
+import utils
 
 
 class Neuron():
@@ -110,21 +95,21 @@ class FCNet():
     def backward(self, out_vals, gt_vals, lr=0.5) -> None:
         # Output layer
         for n, neuron in enumerate(self[-1]):
+            tmp2 = neuron.activation.derivative(neuron.out_val)
             for w, weight in enumerate(neuron.weights):
                 tmp1 = self.loss.partial_derivative(gt_vals, out_vals, n)
-                tmp2 = neuron.activation.derivative(neuron.out_val)
                 tmp3 = self[-2][w].get_out_val()
                 tmp4 = weight
                 part_der = tmp1 * tmp2 * tmp3
                 neuron.bp_tmps[w] = tmp1 * tmp2 * tmp4
                 neuron.weights[w] -= lr * part_der
 
-        # Hidden layer
+        # Hidden layers
         for l in range(len(self) - 2, 0, -1):
             for n, neuron in enumerate(self[l]):
+                tmp2 = neuron.activation.derivative(neuron.out_val)
                 for w, weight in enumerate(neuron.weights):
                     tmp1 = np.sum([next_neuron.bp_tmps[n] for next_neuron in self[l + 1]])
-                    tmp2 = neuron.activation.derivative(neuron.out_val)
                     tmp3 = self[l - 1][w].get_out_val()
                     tmp4 = weight
                     part_der = tmp1 * tmp2 * tmp3
@@ -185,7 +170,7 @@ def inference(net, dataset, epoch, lr=0.1, **kwargs) -> None:
 
 def main() -> None:
     inference(
-        net=FCNet([2, 4, 4, 1], Sigmoid, MyLoss),
+        net=FCNet([2, 4, 4, 1], utils.Sigmoid, utils.MSELoss),
         dataset=data.generate_linear(),
         epoch=500,
         lr=0.1,
@@ -193,12 +178,28 @@ def main() -> None:
     )
 
     inference(
-        net=FCNet([2, 4, 4, 1], Sigmoid, MyLoss),
+        net=FCNet([2, 4, 4, 1], utils.Sigmoid, utils.MSELoss),
         dataset=data.generate_XOR_easy(),
         epoch=3000,
         lr=0.1,
         print_loss_per_epoch=300,
-    ) 
+    )
+
+    inference(
+        net=FCNet([2, 4, 4, 1], utils.Sigmoid, utils.MAELoss),
+        dataset=data.generate_linear(),
+        epoch=500,
+        lr=0.1,
+        print_loss_per_epoch=50,
+    )
+
+    inference(
+        net=FCNet([2, 4, 4, 1], utils.Sigmoid, utils.MAELoss),
+        dataset=data.generate_XOR_easy(),
+        epoch=15000,
+        lr=0.05,
+        print_loss_per_epoch=300,
+    )
 
 
 if __name__ == '__main__':
