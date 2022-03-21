@@ -36,3 +36,11 @@ class Sigmoid():
 
     def derivative(x):
         return np.multiply(x, 1.0 - x)
+
+
+class NoActivation():
+    def apply(x):
+        return x
+
+    def derivative(x):
+        return 1.0
