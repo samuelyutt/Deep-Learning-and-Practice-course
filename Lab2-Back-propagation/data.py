@@ -1,7 +1,9 @@
 import numpy as np
 
 
-def generate_linear(n=100):
+def generate_linear(n=100, random_seed=None):
+    if random_seed is not None:
+        np.random.seed(random_seed)
     pts = np.random.uniform(0, 1, (n, 2))
     inputs = []
     labels = []
