@@ -3,6 +3,9 @@ Lab3-2048/**/src/2048.dysm/
 Lab3-2048/**/src/tmp/
 Lab3-2048/**/weights/
 
+# VSCode
+.vscode/
+
 # macOS file system files
 **/.DS_Store
 
